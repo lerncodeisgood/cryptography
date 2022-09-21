@@ -20,7 +20,7 @@ library VerifySig{
   
       bytes32 r=bytesToBytes32(slice(signedString,0,32));
       bytes32 s=bytesToBytes32(slice(signedString,32,32));
-      byte  _v = slice(signedString,64,1)[0];
+      byte  _v=slice(signedString,64,1)[0];
       uint8 v = uint8(_v);
       return (r,s,v);
      // return ecrecoverDecode(r,s,v);
@@ -343,7 +343,7 @@ contract Mycontract {
                 emit Right_audit("auditor3", msg.sender, block.number);
             }
         }else{
-            revert("already have 3 peopel Audited");
+            revert("already have 3 people Audited");
         }
         
     }

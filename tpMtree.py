@@ -13,9 +13,9 @@ load_dotenv()
 class tp_MerkleTree():
 	def __init__ (self,N):
 		self.N = N#樹高
-		
+
 		self.leafnode_row = [''] * (2 ** (N-1))#葉子節點的陣列
-		
+
 
 	#計算index
 	def calLeafIndex(self,key):
@@ -35,7 +35,7 @@ class tp_MerkleTree():
 		array[6] = bytes(array[6][2:],encoding='utf-8')
 		array[7] = bytes(array[7][2:],encoding='utf-8')
 		return array
-	#取得receipt的雜湊值	
+	#取得receipt的雜湊值
 	def receipthash(self,json_file):
 		value_dict = json_file.values()
 		result = []
@@ -45,7 +45,7 @@ class tp_MerkleTree():
 		msg = ''.join(result)
 		receipt_hash = hashstring(msg)
 		return receipt_hash
-	#插入key-value pair到tree中		
+	#插入key-value pair到tree中
 	def Insert(self,receipt):
 		R_dict = receipt
 		leafnode_row = self.leafnode_row
@@ -58,7 +58,7 @@ class tp_MerkleTree():
 		if leafnode_row[index] == '':
 			leafnode_row[index] = key_value_dict
 
-		else:	
+		else:
 			leafnode_row[index][binascii.a2b_hex(indexValue_hash)] = binascii.a2b_hex(receipt_hash)
 		return leafnode_row
 
@@ -71,8 +71,8 @@ class tp_MerkleTree():
 				node_list[i] = leafnodehash(leafnode[i])
 			else:
 				node_list[i] = hashstring((leafnode[i]))
-	
-	
+
+
 		X = 0
 		node_list = list(reversed(node_list))
 
@@ -80,37 +80,37 @@ class tp_MerkleTree():
 		while(L - X >= 2):
 			L = len(node_list)
 			for i in range(X,L,2):
-			
+
 				node_hash =hash_LnR(node_list[i+1],node_list[i])
 
 				node_list.append(node_hash)
-			X = L 
+			X = L
 			L = len(node_list)
 		nodehash = list(reversed(node_list))
 		return nodehash,nodehash[0]
 
-	#取得leafnode節點編號為I的Slice	
+	#取得leafnode節點編號為I的Slice
 	def ExtractSlice(self,leafnode,I):
 		nodehash = (self.get_node_hash(leafnode))[0]
 		Slice = list()
-		X = I + 2 ** (self.N-1)-1 
+		X = I + 2 ** (self.N-1)-1
 		while(X != 0):
 			if X % 2 == 0:
-			
+
 				Slice.append(nodehash[X-1])
 				Slice.append(nodehash[X])
 			else:
 				Slice.append(nodehash[X])
 				Slice.append(nodehash[X+1])
-				
-				  		
+
+
 			X = (math.floor((X-1)/2))
-		
-			
+
+
 		Slice.append(nodehash[0])
 		Slice = ''.join(Slice)
 		return Slice
-	#計算取出的Slice算出的root hash值是否跟root hash相同	
+	#計算取出的Slice算出的root hash值是否跟root hash相同
 	def evalRootHashFromSlice(self,Slice,roothash):
 		Slice = [Slice[i:i+64] for i in range(0,len(Slice), 64)]
 		pt = 0 #pointer of slice
@@ -119,29 +119,29 @@ class tp_MerkleTree():
 			if (digest != Slice[pt+2]) and (digest != Slice[pt+3]):
 				print("Value Error")
 				print("where happend : ",Slice.index(Slice[pt]))
-			pt += 2	
+			pt += 2
 		digest = hash_LnR(Slice[pt],Slice[pt+1])
-		
-		return digest == roothash 
+
+		return digest == roothash
 
 
 if __name__ == '__main__':
 	# tp_tree_db = tp_MerkleTree(3)
 	# receipt_list = transfer_dbfile_to_receipt()
 	# for r in receipt_list:
-	# 	tp_tree_db.Insert(r)	
+	# 	tp_tree_db.Insert(r)
 	# leafnoderow_db = tp_tree_db.leafnode_row
 	# rh_db = (tp_tree_db.get_node_hash(leafnoderow_db))[0]
-	
-	tp_tree_gcs = tp_MerkleTree(16)
-	receipt_list = transfer_gcsfile_to_receipt(os.getenv('GCS_BUCKET'))
-	for r in receipt_list:
-		tp_tree_gcs.Insert(r)
-	leafnoderow_gcs = tp_tree_gcs.leafnode_row
-	rh_gcs = (tp_tree_gcs.get_node_hash(leafnoderow_gcs))[1]
-	index = tp_tree_gcs.calLeafIndex('6d7af00a-dde4-43b6-8308-27e4fe23f0f0.png')
-	
-	sl = tp_tree_gcs.ExtractSlice(leafnoderow_gcs,index)
-	
-	print(tp_tree_gcs.evalRootHashFromSlice(sl,rh_gcs))
-	print(rh_gcs)
+
+	# tp_tree_gcs = tp_MerkleTree(16)
+	# receipt_list = transfer_gcsfile_to_receipt(os.getenv('GCS_BUCKET'))
+	# for r in receipt_list:
+	# 	tp_tree_gcs.Insert(r)
+	# leafnoderow_gcs = tp_tree_gcs.leafnode_row
+	# rh_gcs = (tp_tree_gcs.get_node_hash(leafnoderow_gcs))[1]
+	# index = tp_tree_gcs.calLeafIndex('6d7af00a-dde4-43b6-8308-27e4fe23f0f0.png')
+
+	# sl = tp_tree_gcs.ExtractSlice(leafnoderow_gcs,index)
+
+	# print(tp_tree_gcs.evalRootHashFromSlice(sl,rh_gcs))
+	# print(rh_gcs)

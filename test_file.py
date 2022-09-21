@@ -60,7 +60,7 @@ class SignableMessage(NamedTuple):
     header: HexBytes  # aka "version specific data"
     body: HexBytes  # aka "data to sign"
 def to_32byte_hex(val):
-   return Web3.toHex(Web3.toBytes(val).rjust(32, b'\0'))    
+   return Web3.toHex(Web3.toBytes(val).rjust(32, b'\0'))
 
 
 def _hash_eip191_message(signable_message: SignableMessage) -> Hash32:
@@ -72,7 +72,7 @@ def _hash_eip191_message(signable_message: SignableMessage) -> Hash32:
         )
 
     return keccak(
-        
+
         b'1945' +
         signable_message.header +
         signable_message.body
@@ -87,7 +87,7 @@ def encode_intended_validator(
         hexstr: str = None,
         text: str = None) -> SignableMessage:
     """
-  
+
     """
     if not is_valid_address(validator_address):
         raise ValidationError(
@@ -108,7 +108,7 @@ def encode_structured_data(
         hexstr: str = None,
         text: str = None) -> SignableMessage:
     """
-   
+
     """
     if isinstance(primitive, Mapping):
         message_string = json.dumps(primitive)
@@ -147,7 +147,7 @@ def defunct_hash_message(
         hexstr: str = None,
         text: str = None) -> HexBytes:
     """
-   
+
     """
     signable = encode_defunct(primitive, hexstr=hexstr, text=text)
     hashed = _hash_eip191_message(signable)
@@ -174,14 +174,13 @@ def adjust(array):
         array[2] = binascii.hexlify(array[2].to_bytes(32,'big'))
         array[3] = binascii.hexlify(bytes(str(array[3]),encoding='utf-8'))
 
-    return array    
+    return array
 def w3signature(json_file,private_key):
     value_dict = json_file.values()
     result = []
 
     for values in value_dict:
         result.append(values)
-    
     result = adjust(result)
     msg = b''.join(result)
     message = encode_defunct(primitive=msg)
@@ -194,7 +193,7 @@ def PublickeytoAddress(public_key):
 
 
 
-    
+
 
 
 PK_SPO = "ff718dbb708550cb9663931d6181a6a7eaec7b9ae7e371241fc34908c3ab130b"
@@ -221,16 +220,16 @@ for i in range(1,11):
     PhotographerPK_record.append(PK_P)
     #sigR = signature(str(json_request_withoutsigR),privatekey[publickey.index(PK_R)])
     #sigSPO = signature(str(json_receipt_withoutsig),str(SK_SPO))
-    
+
     p = random.randint(1,10)
-    
+
     json_request_withoutsigR = {'PK_Runner':PK_R, 'Photographer_address':P_adr, 'number of photo':p,'indexValue':str(PK_R)}
-    
+
     sigR = w3signature((json_request_withoutsigR),privatekey[publickey.index(PK_P)])
 
     #index = calLeafIndex(a,4)
     json_request_withsigR = {'PK_Runner':PK_R, 'Photographer_address':P_adr, 'number of photo':p,'indexValue':str(PK_R),'sigClient':sigR}
-    
+
     if PhotographerPK_record.count(PK_P) >= 2:
 
 
@@ -242,7 +241,7 @@ for i in range(1,11):
 
     sigSPO = w3signature((json_receipt_withoutsig),SK_SPO)
 
-    
+
     json_receipt_withsig = json_receipt_withoutsig
     json_receipt_withsig['sigSPO'] = sigSPO
 
@@ -256,6 +255,6 @@ for i in range(1,11):
     jname ="C:/Users//Desktop/test10/%d.json"%(i)
     with open(jname,'w') as f:
         json.dump(json_receipt_withsig,f)
-        
+
 
     {'name':'ADATA','storage_location':'gcs','extension_id':'1','folder_id':'270','uploader_id':'1','indexValue':'8b7f324f-96af-42d2-9b9a-f3a411ca06f2.jpg','tab_id':'1'}
